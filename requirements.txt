@@ -1,0 +1,10 @@
+# Core dependencies
+requests
+requests-ip-rotator
+
+# AWS dependencies
+boto3
+
+# GCP dependencies (optional)
+google-cloud-compute
+
