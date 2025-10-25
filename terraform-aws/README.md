@@ -24,7 +24,7 @@ Terraform configuration for IP rotation using AWS API Gateway across multiple re
 │  Region: eu-west-1                                          │
 │  └─ API Gateway: https://xxx.execute-api.eu-west-1.amazonaws.com │
 │                                                             │
-│  Total: 5 regional API Gateway endpoints                   │
+│  Total: 5 regional API Gateway endpoints                    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
