@@ -132,7 +132,7 @@ Get your AWS credentials:
 
 ## GCP True IP Rotation (Terraform)
 
-Want TRUE IP rotation on GCP with Cloud NAT? We've got you covered!
+Want TRUE IP rotation on GCP with Cloud NAT? Got you covered!
 
 ### Quick Deploy
 
