@@ -55,7 +55,7 @@ resource "aws_api_gateway_integration" "root_integration" {
   http_method = aws_api_gateway_method.root_any.http_method
   
   type                    = "HTTP_PROXY"
-  integration_http_method = "ANY"
+  integration_http_method = "GET"
   uri                     = var.target_endpoint
   
   request_parameters = {
@@ -70,7 +70,7 @@ resource "aws_api_gateway_integration" "proxy_integration" {
   http_method = aws_api_gateway_method.proxy_any.http_method
   
   type                    = "HTTP_PROXY"
-  integration_http_method = "ANY"
+  integration_http_method = "GET"
   uri                     = "${var.target_endpoint}/{proxy}"
   
   request_parameters = {
