@@ -34,79 +34,194 @@ except ImportError as e:
     sys.exit(1)
 
 
-# ASCII Art Banner
-BANNER = """
-        ╔════════════════════════════════════════════════════════════╗
-        ║                                                            ║
-        ║     ██████  ██████   ██████  ██   ██ ██    ██              ║
-        ║     ██   ██ ██   ██ ██    ██  ██ ██   ██  ██               ║
-        ║     ██████  ██████  ██    ██   ███     ████                ║
-        ║     ██      ██   ██ ██    ██  ██ ██     ██                 ║
-        ║     ██      ██   ██  ██████  ██   ██    ██                 ║
-        ║                                                            ║
-        ║     ██████   ██████  ████████                              ║
-        ║     ██   ██ ██    ██    ██                                 ║
-        ║     ██████  ██    ██    ██                                 ║
-        ║     ██   ██ ██    ██    ██                                 ║
-        ║     ██   ██  ██████     ██                                 ║
-        ║                                                            ║
-        ╚════════════════════════════════════════════════════════════╝
-                         
-              →  IP ROTATION ARSENAL  ←
-                         
-        ┌────────────────────────────────────────────────────────────┐
-        │  STATUS: LOCKED & LOADED                                   │
-        │  MODE: Automatic IP Cycling                                │
-        │  PROVIDERS: AWS API Gateway | Google Cloud Platform        │
-        └────────────────────────────────────────────────────────────┘
-"""
+# ANSI Color Codes
+class Colors:
+    # Reset
+    RESET = '\033[0m'
+    BOLD = '\033[1m'
+    DIM = '\033[2m'
+    
+    # Foreground colors
+    BLACK = '\033[30m'
+    RED = '\033[31m'
+    GREEN = '\033[32m'
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    MAGENTA = '\033[35m'
+    CYAN = '\033[36m'
+    WHITE = '\033[37m'
+    
+    # Bright foreground colors
+    BRIGHT_BLACK = '\033[90m'
+    BRIGHT_RED = '\033[91m'
+    BRIGHT_GREEN = '\033[92m'
+    BRIGHT_YELLOW = '\033[93m'
+    BRIGHT_BLUE = '\033[94m'
+    BRIGHT_MAGENTA = '\033[95m'
+    BRIGHT_CYAN = '\033[96m'
+    BRIGHT_WHITE = '\033[97m'
+    
+    # Background colors
+    BG_BLACK = '\033[40m'
+    BG_RED = '\033[41m'
+    BG_GREEN = '\033[42m'
+    BG_BLUE = '\033[44m'
+    BG_MAGENTA = '\033[45m'
+    BG_CYAN = '\033[46m'
+    
+    # Gradient colors (custom 256-color palette)
+    @staticmethod
+    def rgb(r, g, b):
+        """Generate 24-bit RGB color code."""
+        return f'\033[38;2;{r};{g};{b}m'
+    
+    @staticmethod
+    def bg_rgb(r, g, b):
+        """Generate 24-bit RGB background color code."""
+        return f'\033[48;2;{r};{g};{b}m'
 
-MENU_BANNER = """
-╔════════════════════════════════════════════════════════════════════╗
-║                       SELECT CLOUD PROVIDER                        ║
-╚════════════════════════════════════════════════════════════════════╝
-"""
+
+def strip_ansi(text):
+    """Remove ANSI color codes from text to get visible length."""
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
 
 
-def print_separator(char="─", length=80):
-    """Print a horizontal separator line."""
-    print(char * length)
+def visible_length(text):
+    """Get the visible length of text (excluding ANSI codes)."""
+    return len(strip_ansi(text))
+
+
+def gradient_text(text, start_color, end_color):
+    """Apply gradient effect to text."""
+    if len(text) == 0:
+        return text
+    
+    result = []
+    length = len(text)
+    
+    for i, char in enumerate(text):
+        # Calculate interpolated color
+        ratio = i / max(length - 1, 1)
+        r = int(start_color[0] + (end_color[0] - start_color[0]) * ratio)
+        g = int(start_color[1] + (end_color[1] - start_color[1]) * ratio)
+        b = int(start_color[2] + (end_color[2] - start_color[2]) * ratio)
+        
+        result.append(f'{Colors.rgb(r, g, b)}{char}')
+    
+    result.append(Colors.RESET)
+    return ''.join(result)
+
+
+# ASCII Art Banner with gradients
+def print_banner():
+    """Print stylized banner with gradients."""
+    cyan_to_blue = lambda text: gradient_text(text, (0, 255, 255), (0, 100, 255))
+    blue_to_purple = lambda text: gradient_text(text, (0, 150, 255), (200, 0, 255))
+    
+    print()
+    print(f"{Colors.BRIGHT_CYAN}        ╔════════════════════════════════════════════════════════════╗{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}                                                            {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {cyan_to_blue('██████  ██████   ██████  ██   ██ ██    ██')}              {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {cyan_to_blue('██   ██ ██   ██ ██    ██  ██ ██   ██  ██')}               {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {cyan_to_blue('██████  ██████  ██    ██   ███     ████')}                {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {cyan_to_blue('██      ██   ██ ██    ██  ██ ██     ██')}                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {cyan_to_blue('██      ██   ██  ██████  ██   ██    ██')}                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}                                                            {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {blue_to_purple('██████   ██████  ████████')}                              {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {blue_to_purple('██   ██ ██    ██    ██')}                                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {blue_to_purple('██████  ██    ██    ██')}                                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {blue_to_purple('██   ██ ██    ██    ██')}                                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {blue_to_purple('██   ██  ██████     ██')}                                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}                                                            {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    print(f"{Colors.BRIGHT_CYAN}        ╚════════════════════════════════════════════════════════════╝{Colors.RESET}")
+    print()
+    print(f"              {Colors.BOLD}{Colors.BRIGHT_MAGENTA}▶  IP ROTATION ARSENAL  ◀{Colors.RESET}")
+    print()
+    print(f"{Colors.BRIGHT_BLACK}        ┌────────────────────────────────────────────────────────────┐{Colors.RESET}")
+    print(f"{Colors.BRIGHT_BLACK}        │{Colors.RESET}  {Colors.BRIGHT_GREEN}STATUS:{Colors.RESET} {Colors.GREEN}LOCKED & LOADED{Colors.RESET}                                   {Colors.BRIGHT_BLACK}│{Colors.RESET}")
+    print(f"{Colors.BRIGHT_BLACK}        │{Colors.RESET}  {Colors.BRIGHT_BLUE}MODE:{Colors.RESET} {Colors.BLUE}Automatic IP Cycling{Colors.RESET}                                {Colors.BRIGHT_BLACK}│{Colors.RESET}")
+    print(f"{Colors.BRIGHT_BLACK}        │{Colors.RESET}  {Colors.BRIGHT_YELLOW}PROVIDERS:{Colors.RESET} {Colors.YELLOW}AWS API Gateway | Google Cloud Platform{Colors.RESET}        {Colors.BRIGHT_BLACK}│{Colors.RESET}")
+    print(f"{Colors.BRIGHT_BLACK}        └────────────────────────────────────────────────────────────┘{Colors.RESET}")
+    print()
+
+
+def print_menu_banner():
+    """Print menu banner with gradients."""
+    title = "SELECT CLOUD PROVIDER"
+    title_gradient = gradient_text(title, (0, 255, 200), (150, 100, 255))
+    
+    indent = "        "  # 8 spaces to match other boxes
+    print()
+    print(f"{indent}{Colors.BRIGHT_MAGENTA}╔════════════════════════════════════════════════════════════════════╗{Colors.RESET}")
+    print(f"{indent}{Colors.BRIGHT_MAGENTA}║{Colors.RESET}                       {title_gradient}                        {Colors.BRIGHT_MAGENTA}║{Colors.RESET}")
+    print(f"{indent}{Colors.BRIGHT_MAGENTA}╚════════════════════════════════════════════════════════════════════╝{Colors.RESET}")
+    print()
+
+
+def print_separator(char="─", length=80, color=None):
+    """Print a horizontal separator line with optional color."""
+    if color:
+        print(f"{color}{char * length}{Colors.RESET}")
+    else:
+        print(f"{Colors.BRIGHT_BLACK}{char * length}{Colors.RESET}")
 
 
 def print_box(message: str, width=80):
-    """Print a message in a box."""
+    """Print a message in a box with gradient."""
     padding = width - len(message) - 4
     left_pad = padding // 2
     right_pad = padding - left_pad
-    print(f"║ {' ' * left_pad}{message}{' ' * right_pad} ║")
+    msg_gradient = gradient_text(message, (100, 200, 255), (200, 100, 255))
+    print(f"{Colors.BRIGHT_CYAN}║{Colors.RESET} {' ' * left_pad}{msg_gradient}{' ' * right_pad} {Colors.BRIGHT_CYAN}║{Colors.RESET}")
 
 
 def print_status(status: str, message: str):
-    """Print a status message with formatting."""
-    status_colors = {
-        "INFO": "►",
-        "SUCCESS": "✓",
-        "ERROR": "✗",
-        "WAIT": "◆",
-        "REQUEST": "→"
+    """Print a status message with formatting and colors."""
+    status_config = {
+        "INFO": ("►", Colors.BRIGHT_BLUE),
+        "SUCCESS": ("✓", Colors.BRIGHT_GREEN),
+        "ERROR": ("✗", Colors.BRIGHT_RED),
+        "WAIT": ("◆", Colors.BRIGHT_YELLOW),
+        "REQUEST": ("→", Colors.BRIGHT_CYAN)
     }
-    symbol = status_colors.get(status, "•")
-    print(f"  {symbol} [{status:8s}] {message}")
+    symbol, color = status_config.get(status, ("•", Colors.WHITE))
+    print(f"  {color}{symbol} [{status:8s}]{Colors.RESET} {message}")
 
 
 def print_rotation_bar(current: int, total: int):
-    """Print a rotation progress bar."""
+    """Print a rotation progress bar with gradient."""
     percentage = int((current / total) * 100)
     filled = int((current / total) * 20)
-    bar = "▓" * filled + "░" * (20 - filled)
+    
+    # Create gradient bar
+    bar_parts = []
+    for i in range(20):
+        if i < filled:
+            # Gradient from cyan to magenta for filled portion
+            ratio = i / max(filled - 1, 1) if filled > 1 else 0
+            r = int(0 + (200 - 0) * ratio)
+            g = int(255 - (155 * ratio))
+            b = int(255)
+            bar_parts.append(f"{Colors.rgb(r, g, b)}▓{Colors.RESET}")
+        else:
+            bar_parts.append(f"{Colors.BRIGHT_BLACK}░{Colors.RESET}")
+    
+    bar = ''.join(bar_parts)
+    
     print()
-    print(f"              [{bar}]")
-    print(f"                  ROTATING... {percentage}%")
+    print(f"              {Colors.BRIGHT_BLACK}[{Colors.RESET}{bar}{Colors.BRIGHT_BLACK}]{Colors.RESET}")
+    
+    # Gradient percentage
+    perc_text = gradient_text(f"ROTATING... {percentage}%", (0, 255, 255), (200, 100, 255))
+    print(f"                  {perc_text}")
     print()
+    
     if current < total:
-        print(f"         ⟳  Next rotation in progress...  ⟳")
+        print(f"         {Colors.BRIGHT_CYAN}⟳  Next rotation in progress...  ⟳{Colors.RESET}")
     else:
-        print(f"         ✓  All rotations complete!  ✓")
+        print(f"         {Colors.BRIGHT_GREEN}✓  All rotations complete!  ✓{Colors.RESET}")
     print()
 
 
@@ -123,42 +238,59 @@ def display_menu() -> str:
     Returns:
         Selected provider ('aws' or 'gcp')
     """
-    print(MENU_BANNER)
-    print()
-    print("  ┌═════════════════════════════════════════════════════════════════════════════┐")
-    print("  │                                                                             │")
-    print("  │    [1]  AWS API Gateway                                                     │")
-    print("  │         → Uses Terraform-deployed API Gateway endpoints                     │")
-    print("  │         → Requires: terraform-aws infrastructure deployed                   │")
-    print("  │         → Rotates through 5 regional endpoints                              │")
-    print("  │                                                                             │")
-    print("  │    [2]  Google Cloud Platform                                               │")
-    print("  │         → Uses GCP Compute Engine with multiple regions                     │")
-    print("  │         → Requires: GCP project & gcloud authentication                     │")
-    print("  │         → Cost: Variable (based on compute usage)                           │")
-    print("  │                                                                             │")
-    print("  │    [Q]  Quit                                                                │")
-    print("  │                                                                             │")
-    print("  └═════════════════════════════════════════════════════════════════════════════┘")
+    print_menu_banner()
+    
+    border_color = Colors.BRIGHT_BLUE
+    box_width = 77
+    
+    def print_menu_line(content):
+        """Print a menu line with proper padding."""
+        vis_len = visible_length(content)
+        padding = box_width - vis_len
+        print(f"  {border_color}│{Colors.RESET}{content}{' ' * padding}{border_color}│{Colors.RESET}")
+    
+    print(f"  {border_color}┌{'═' * box_width}┐{Colors.RESET}")
+    print_menu_line("")
+    print_menu_line(f"    {Colors.BOLD}{Colors.BRIGHT_CYAN}[1]{Colors.RESET}  {Colors.BRIGHT_WHITE}AWS API Gateway{Colors.RESET}")
+    print_menu_line(f"         {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.CYAN}Uses Terraform-deployed API Gateway endpoints{Colors.RESET}")
+    print_menu_line(f"         {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.CYAN}Requires: terraform-aws infrastructure deployed{Colors.RESET}")
+    print_menu_line(f"         {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.CYAN}Rotates through 5 regional endpoints{Colors.RESET}")
+    print_menu_line("")
+    print_menu_line(f"    {Colors.BOLD}{Colors.BRIGHT_MAGENTA}[2]{Colors.RESET}  {Colors.BRIGHT_WHITE}Google Cloud Platform{Colors.RESET}")
+    print_menu_line(f"         {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.MAGENTA}Uses GCP Compute Engine with multiple regions{Colors.RESET}")
+    print_menu_line(f"         {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.MAGENTA}Requires: GCP project & gcloud authentication{Colors.RESET}")
+    print_menu_line(f"         {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.MAGENTA}Cost: Variable (based on compute usage){Colors.RESET}")
+    print_menu_line("")
+    print_menu_line(f"    {Colors.BOLD}{Colors.BRIGHT_YELLOW}[3]{Colors.RESET}  {Colors.BRIGHT_WHITE}View Current IPs{Colors.RESET}")
+    print_menu_line(f"         {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.YELLOW}Display available IPs without running rotation{Colors.RESET}")
+    print_menu_line(f"         {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.YELLOW}Shows IPs from deployed AWS/GCP infrastructure{Colors.RESET}")
+    print_menu_line("")
+    print_menu_line(f"    {Colors.BOLD}{Colors.BRIGHT_RED}[Q]{Colors.RESET}  {Colors.BRIGHT_WHITE}Quit{Colors.RESET}")
+    print_menu_line("")
+    print(f"  {border_color}└{'═' * box_width}┘{Colors.RESET}")
     print()
     
     while True:
-        choice = input("  → Select provider [1/2/Q]: ").strip().lower()
+        choice = input(f"  {Colors.BRIGHT_YELLOW}→{Colors.RESET} Select option {Colors.BRIGHT_BLACK}[1/2/3/Q]{Colors.RESET}: ").strip().lower()
         
         if choice in ['1', 'aws']:
             print()
-            print_status("INFO", "Selected: AWS API Gateway")
+            print_status("INFO", f"{Colors.BRIGHT_CYAN}Selected: AWS API Gateway{Colors.RESET}")
             return 'aws'
         elif choice in ['2', 'gcp']:
             print()
-            print_status("INFO", "Selected: Google Cloud Platform")
+            print_status("INFO", f"{Colors.BRIGHT_MAGENTA}Selected: Google Cloud Platform{Colors.RESET}")
             return 'gcp'
+        elif choice in ['3', 'view']:
+            print()
+            print_status("INFO", f"{Colors.BRIGHT_YELLOW}Selected: View Current IPs{Colors.RESET}")
+            return 'view'
         elif choice in ['q', 'quit', 'exit']:
             print()
             print_status("INFO", "Exiting...")
             sys.exit(0)
         else:
-            print("  ✗ Invalid choice. Please enter 1, 2, or Q.")
+            print(f"  {Colors.BRIGHT_RED}✗{Colors.RESET} Invalid choice. Please enter {Colors.CYAN}1{Colors.RESET}, {Colors.MAGENTA}2{Colors.RESET}, {Colors.YELLOW}3{Colors.RESET}, or {Colors.RED}Q{Colors.RESET}.")
 
 
 def export_to_csv(proxy_data: List[Dict], filename: str = "proxy_ips.csv") -> bool:
@@ -247,6 +379,122 @@ def get_terraform_endpoints() -> List[str]:
         return []
 
 
+def view_current_ips():
+    """
+    Display current available IPs from deployed infrastructure without running rotation.
+    """
+    print_separator()
+    print()
+    
+    header_text = "CURRENT AVAILABLE IPs"
+    header_gradient = gradient_text(header_text, (255, 200, 0), (255, 100, 200))
+    print(f"        {Colors.BRIGHT_YELLOW}╔══════════════════════════════════════════════════════════╗{Colors.RESET}")
+    print(f"        {Colors.BRIGHT_YELLOW}║{Colors.RESET}              {header_gradient}                   {Colors.BRIGHT_YELLOW}║{Colors.RESET}")
+    print(f"        {Colors.BRIGHT_YELLOW}╚══════════════════════════════════════════════════════════╝{Colors.RESET}")
+    print()
+    
+    # Check AWS endpoints
+    print_status("INFO", f"{Colors.BRIGHT_CYAN}Checking AWS API Gateway endpoints...{Colors.RESET}")
+    print()
+    
+    aws_endpoints = get_terraform_endpoints()
+    aws_ips = []
+    
+    if aws_endpoints:
+        print(f"  {Colors.BRIGHT_CYAN}┌─ AWS API Gateway ({len(aws_endpoints)} regions) ─────────────────────────────┐{Colors.RESET}")
+        print(f"  {Colors.BRIGHT_CYAN}│{Colors.RESET}{' ' * 77}{Colors.BRIGHT_CYAN}│{Colors.RESET}")
+        
+        for idx, endpoint in enumerate(aws_endpoints, 1):
+            try:
+                # Extract region from endpoint
+                region = "unknown"
+                if ".execute-api." in endpoint:
+                    region = endpoint.split(".execute-api.")[1].split(".")[0]
+                
+                # Make a quick request to get the IP
+                response = requests.get(endpoint + "/ip", timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    ip = extract_ip(data)
+                    aws_ips.append(ip)
+                    
+                    # Display with gradient
+                    print(f"  {Colors.BRIGHT_CYAN}│{Colors.RESET}  {Colors.BRIGHT_WHITE}[{idx}]{Colors.RESET} {Colors.CYAN}{region:15s}{Colors.RESET} {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.BRIGHT_GREEN}{ip:50s}{Colors.RESET} {Colors.BRIGHT_CYAN}│{Colors.RESET}")
+                else:
+                    print(f"  {Colors.BRIGHT_CYAN}│{Colors.RESET}  {Colors.BRIGHT_WHITE}[{idx}]{Colors.RESET} {Colors.CYAN}{region:15s}{Colors.RESET} {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.BRIGHT_RED}Failed (Status {response.status_code}){' ' * 30}{Colors.RESET} {Colors.BRIGHT_CYAN}│{Colors.RESET}")
+            except Exception as e:
+                print(f"  {Colors.BRIGHT_CYAN}│{Colors.RESET}  {Colors.BRIGHT_WHITE}[{idx}]{Colors.RESET} {Colors.CYAN}{region:15s}{Colors.RESET} {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.BRIGHT_RED}Error: {str(e)[:40]:40s}{Colors.RESET} {Colors.BRIGHT_CYAN}│{Colors.RESET}")
+        
+        print(f"  {Colors.BRIGHT_CYAN}│{Colors.RESET}{' ' * 77}{Colors.BRIGHT_CYAN}│{Colors.RESET}")
+        print(f"  {Colors.BRIGHT_CYAN}└{'─' * 77}┘{Colors.RESET}")
+        print()
+    else:
+        print(f"  {Colors.BRIGHT_RED}✗{Colors.RESET} No AWS endpoints found. Deploy terraform-aws infrastructure first.")
+        print()
+    
+    # Check GCP endpoints (if available)
+    print_status("INFO", f"{Colors.BRIGHT_MAGENTA}Checking GCP infrastructure...{Colors.RESET}")
+    print()
+    
+    # Check if gcloud is available
+    try:
+        result = subprocess.run(['gcloud', '--version'], 
+                              capture_output=True, 
+                              check=True, 
+                              timeout=5)
+        gcloud_available = True
+    except:
+        gcloud_available = False
+    
+    if not gcloud_available:
+        print(f"  {Colors.BRIGHT_YELLOW}!{Colors.RESET} GCP infrastructure check skipped (gcloud CLI not available)")
+        print(f"    {Colors.BRIGHT_BLACK}To enable GCP rotation:{Colors.RESET}")
+        print(f"    {Colors.BRIGHT_BLACK}1.{Colors.RESET} Install gcloud CLI")
+        print(f"    {Colors.BRIGHT_BLACK}2.{Colors.RESET} Deploy terraform infrastructure")
+        print()
+    else:
+        print(f"  {Colors.BRIGHT_YELLOW}!{Colors.RESET} GCP infrastructure check available but not implemented")
+        print(f"    {Colors.BRIGHT_BLACK}Use GCP rotation option to test deployed instances{Colors.RESET}")
+        print()
+    
+    # Summary
+    print_separator()
+    print()
+    print(f"  {Colors.BRIGHT_GREEN}✓{Colors.RESET} {Colors.BRIGHT_WHITE}Summary:{Colors.RESET}")
+    print(f"    {Colors.BRIGHT_CYAN}AWS:{Colors.RESET} {Colors.CYAN}{len(aws_ips)} IPs available{Colors.RESET}")
+    print()
+    
+    # Offer to export
+    if aws_ips:
+        export_choice = input(f"  {Colors.BRIGHT_YELLOW}→{Colors.RESET} Export IPs to file? {Colors.BRIGHT_BLACK}[Y/n]{Colors.RESET}: ").strip().lower()
+        
+        if export_choice in ['', 'y', 'yes']:
+            print()
+            print_status("WAIT", "Exporting IPs to current_ips.txt...")
+            
+            try:
+                with open('current_ips.txt', 'w') as f:
+                    f.write(f"# AWS API Gateway IPs - Generated {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                    for ip in aws_ips:
+                        # Extract just the second IP (the rotated one)
+                        if ', ' in ip:
+                            rotated_ip = ip.split(', ')[1]
+                            f.write(f"{rotated_ip}\n")
+                        else:
+                            f.write(f"{ip}\n")
+                
+                print_status("SUCCESS", f"{Colors.BRIGHT_GREEN}IPs exported: current_ips.txt{Colors.RESET}")
+                print(f"            {Colors.BRIGHT_BLACK}Total:{Colors.RESET} {Colors.WHITE}{len(aws_ips)} IPs{Colors.RESET}")
+                print()
+            except Exception as e:
+                print_status("ERROR", f"Failed to export: {str(e)}")
+                print()
+        else:
+            print()
+    
+    print_separator()
+
+
 def run_aws_rotation(target_url: str, num_requests: int) -> List[Dict]:
     """
     Run IP rotation using AWS API Gateway.
@@ -275,7 +523,7 @@ def run_aws_rotation(target_url: str, num_requests: int) -> List[Dict]:
             print("  • Terraform state exists in terraform-aws/ directory")
             print()
             return proxy_data
-        
+            
         print_status("SUCCESS", f"Loaded {len(endpoints)} API Gateway endpoints")
         print()
         
@@ -290,9 +538,11 @@ def run_aws_rotation(target_url: str, num_requests: int) -> List[Dict]:
         print()
         
         # Make requests and demonstrate IP rotation
-        print("        ╔══════════════════════════════════════════════════════════╗")
-        print("        ║         ROTATING IP DEMONSTRATION - AWS                  ║")
-        print("        ╚══════════════════════════════════════════════════════════╝")
+        header_text = "ROTATING IP DEMONSTRATION - AWS"
+        header_gradient = gradient_text(header_text, (0, 255, 255), (100, 150, 255))
+        print(f"        {Colors.BRIGHT_CYAN}╔══════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"        {Colors.BRIGHT_CYAN}║{Colors.RESET}         {header_gradient}                  {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+        print(f"        {Colors.BRIGHT_CYAN}╚══════════════════════════════════════════════════════════╝{Colors.RESET}")
         print()
         
         session = requests.Session()
@@ -332,12 +582,14 @@ def run_aws_rotation(target_url: str, num_requests: int) -> List[Dict]:
                     'response_time_ms': f"{response_time:.2f}"
                 })
                 
-                print(f"            ┌{'─' * 60}┐")
-                print(f"            │  Region: {region:<48} │")
-                print(f"            │  IP Address: {ip_address:<44} │")
-                print(f"            │  Status Code: {response.status_code:<43} │")
-                print(f"            │  Response Time: {response_time:.2f} ms{' ' * (37 - len(f'{response_time:.2f}'))} │")
-                print(f"            └{'─' * 60}┘")
+                # Display result box with colors
+                box_color = Colors.BRIGHT_BLUE
+                print(f"            {box_color}┌{'─' * 60}┐{Colors.RESET}")
+                print(f"            {box_color}│{Colors.RESET}  {Colors.BRIGHT_YELLOW}Region:{Colors.RESET} {Colors.YELLOW}{region:<48}{Colors.RESET} {box_color}│{Colors.RESET}")
+                print(f"            {box_color}│{Colors.RESET}  {Colors.BRIGHT_CYAN}IP Address:{Colors.RESET} {Colors.CYAN}{ip_address:<44}{Colors.RESET} {box_color}│{Colors.RESET}")
+                print(f"            {box_color}│{Colors.RESET}  {Colors.BRIGHT_GREEN}Status Code:{Colors.RESET} {Colors.GREEN}{response.status_code:<43}{Colors.RESET} {box_color}│{Colors.RESET}")
+                print(f"            {box_color}│{Colors.RESET}  {Colors.BRIGHT_MAGENTA}Response Time:{Colors.RESET} {Colors.MAGENTA}{response_time:.2f} ms{' ' * (37 - len(f'{response_time:.2f}'))}{Colors.RESET} {box_color}│{Colors.RESET}")
+                print(f"            {box_color}└{'─' * 60}┘{Colors.RESET}")
                 
                 # Show rotation progress bar
                 print_rotation_bar(i, num_requests)
@@ -416,9 +668,11 @@ def run_gcp_rotation(target_url: str, num_requests: int) -> List[Dict]:
         print()
     
     try:
-        print("        ╔══════════════════════════════════════════════════════════╗")
-        print("        ║         ROTATING IP DEMONSTRATION - GCP                  ║")
-        print("        ╚══════════════════════════════════════════════════════════╝")
+        header_text = "ROTATING IP DEMONSTRATION - GCP"
+        header_gradient = gradient_text(header_text, (255, 100, 200), (200, 0, 255))
+        print(f"        {Colors.BRIGHT_MAGENTA}╔══════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"        {Colors.BRIGHT_MAGENTA}║{Colors.RESET}         {header_gradient}                  {Colors.BRIGHT_MAGENTA}║{Colors.RESET}")
+        print(f"        {Colors.BRIGHT_MAGENTA}╚══════════════════════════════════════════════════════════╝{Colors.RESET}")
         print()
         
         if gcloud_available:
@@ -498,12 +752,14 @@ def run_gcp_rotation(target_url: str, num_requests: int) -> List[Dict]:
                     'response_time_ms': f"{response_time:.2f}"
                 })
                 
-                print(f"            ┌{'─' * 60}┐")
-                print(f"            │  Region: {region:<48} │")
-                print(f"            │  IP Address: {ip_address:<44} │")
-                print(f"            │  Status Code: {status_code:<43} │")
-                print(f"            │  Response Time: {response_time:.2f} ms{' ' * (37 - len(f'{response_time:.2f}'))} │")
-                print(f"            └{'─' * 60}┘")
+                # Display result box with colors
+                box_color = Colors.BRIGHT_MAGENTA
+                print(f"            {box_color}┌{'─' * 60}┐{Colors.RESET}")
+                print(f"            {box_color}│{Colors.RESET}  {Colors.BRIGHT_YELLOW}Region:{Colors.RESET} {Colors.YELLOW}{region:<48}{Colors.RESET} {box_color}│{Colors.RESET}")
+                print(f"            {box_color}│{Colors.RESET}  {Colors.BRIGHT_CYAN}IP Address:{Colors.RESET} {Colors.CYAN}{ip_address:<44}{Colors.RESET} {box_color}│{Colors.RESET}")
+                print(f"            {box_color}│{Colors.RESET}  {Colors.BRIGHT_GREEN}Status Code:{Colors.RESET} {Colors.GREEN}{status_code:<43}{Colors.RESET} {box_color}│{Colors.RESET}")
+                print(f"            {box_color}│{Colors.RESET}  {Colors.BRIGHT_MAGENTA}Response Time:{Colors.RESET} {Colors.MAGENTA}{response_time:.2f} ms{' ' * (37 - len(f'{response_time:.2f}'))}{Colors.RESET} {box_color}│{Colors.RESET}")
+                print(f"            {box_color}└{'─' * 60}┘{Colors.RESET}")
                 
                 # Show rotation progress bar
                 print_rotation_bar(i, num_requests)
@@ -545,11 +801,16 @@ def run_gcp_rotation(target_url: str, num_requests: int) -> List[Dict]:
 def main():
     """Main execution function."""
     # Print banner
-    print(BANNER)
-    print()
+    print_banner()
     
     # Display menu and get provider choice
     provider = display_menu()
+    
+    # Handle view option separately
+    if provider == 'view':
+        view_current_ips()
+        return
+    
     print_separator()
     print()
     
@@ -580,23 +841,26 @@ def main():
     if proxy_data:
         print_separator()
         print()
-        print("        ╔══════════════════════════════════════════════════════════╗")
-        print("        ║              EXPORT PROXY LIST                           ║")
-        print("        ╚══════════════════════════════════════════════════════════╝")
+        
+        export_header = "EXPORT PROXY LIST"
+        export_gradient = gradient_text(export_header, (100, 255, 100), (100, 200, 255))
+        print(f"        {Colors.BRIGHT_GREEN}╔══════════════════════════════════════════════════════════╗{Colors.RESET}")
+        print(f"        {Colors.BRIGHT_GREEN}║{Colors.RESET}              {export_gradient}                           {Colors.BRIGHT_GREEN}║{Colors.RESET}")
+        print(f"        {Colors.BRIGHT_GREEN}╚══════════════════════════════════════════════════════════╝{Colors.RESET}")
         print()
-        print(f"            Total IPs collected: {len(proxy_data)}")
+        print(f"            {Colors.BRIGHT_CYAN}Total IPs collected:{Colors.RESET} {Colors.CYAN}{len(proxy_data)}{Colors.RESET}")
         print()
         
         # Ask if user wants to export IPs to text file
-        txt_choice = input("  → Export IP list to proxies.txt? [Y/n]: ").strip().lower()
+        txt_choice = input(f"  {Colors.BRIGHT_YELLOW}→{Colors.RESET} Export IP list to proxies.txt? {Colors.BRIGHT_BLACK}[Y/n]{Colors.RESET}: ").strip().lower()
         
         if txt_choice in ['', 'y', 'yes']:
             print()
             print_status("WAIT", "Exporting IPs to proxies.txt...")
             if export_ips_to_txt(proxy_data, "proxies.txt"):
-                print_status("SUCCESS", "IPs exported: proxies.txt")
-                print(f"            Format: One IP per line")
-                print(f"            Total: {len(proxy_data)} IPs")
+                print_status("SUCCESS", f"{Colors.BRIGHT_GREEN}IPs exported: proxies.txt{Colors.RESET}")
+                print(f"            {Colors.BRIGHT_BLACK}Format:{Colors.RESET} {Colors.WHITE}One IP per line{Colors.RESET}")
+                print(f"            {Colors.BRIGHT_BLACK}Total:{Colors.RESET} {Colors.WHITE}{len(proxy_data)} IPs{Colors.RESET}")
             print()
         else:
             print()
@@ -606,9 +870,11 @@ def main():
         print_status("ERROR", "No proxy data collected")
         print()
     
-    print_separator("═")
-    print_box("PROXY ROTATION COMPLETE", 80)
-    print_separator("═")
+    # Final completion message with gradient
+    print_separator("═", 80, Colors.BRIGHT_MAGENTA)
+    completion_text = "PROXY ROTATION COMPLETE"
+    print_box(completion_text, 80)
+    print_separator("═", 80, Colors.BRIGHT_MAGENTA)
 
 
 if __name__ == "__main__":
