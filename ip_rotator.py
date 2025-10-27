@@ -4,32 +4,33 @@ Cloud Proxy IP Rotator - Badass Edition
 
 Prerequisites:
     1. Install required packages:
-       pip install requests-ip-rotator requests boto3 google-cloud-compute
+       pip install requests boto3 google-cloud-compute
 
     2. AWS Setup:
-       - AWS CLI: `aws configure`
-       - Environment variables: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
-       - AWS credentials file: ~/.aws/credentials
-       - Permissions: apigateway:*, iam:CreateRole
+       - Deploy Terraform infrastructure: cd terraform-aws && terraform apply
+       - AWS credentials must be configured for Terraform
+       - Script reads endpoints from terraform-aws/terraform.tfstate
 
-    3. GCP Setup:
+    3. GCP Setup (Optional):
+       - Deploy Terraform infrastructure: cd terraform && ./deploy.sh
        - Install gcloud CLI: https://cloud.google.com/sdk/docs/install
        - Authenticate: `gcloud auth application-default login`
        - Set project: `gcloud config set project YOUR_PROJECT_ID`
-       - Enable APIs: Compute Engine API, Cloud Functions API
 """
 
 import sys
 import time
 import csv
+import json
+import subprocess
+import os
 from datetime import datetime
 from typing import Optional, List, Dict
 
 try:
     import requests
-    from requests_ip_rotator import ApiGateway
 except ImportError as e:
-    print("[ERROR] Missing required package. Run: pip install requests-ip-rotator requests boto3")
+    print("[ERROR] Missing required package. Run: pip install requests boto3")
     sys.exit(1)
 
 
@@ -127,9 +128,9 @@ def display_menu() -> str:
     print("  ┌═════════════════════════════════════════════════════════════════════════════┐")
     print("  │                                                                             │")
     print("  │    [1]  AWS API Gateway                                                     │")
-    print("  │         → Uses Amazon API Gateway endpoints for IP rotation                 │")
-    print("  │         → Requires: AWS credentials configured                              │")
-    print("  │         → Cost: Free tier (1M requests/month)                               │")
+    print("  │         → Uses Terraform-deployed API Gateway endpoints                     │")
+    print("  │         → Requires: terraform-aws infrastructure deployed                   │")
+    print("  │         → Rotates through 5 regional endpoints                              │")
     print("  │                                                                             │")
     print("  │    [2]  Google Cloud Platform                                               │")
     print("  │         → Uses GCP Compute Engine with multiple regions                     │")
@@ -210,12 +211,48 @@ def export_ips_to_txt(proxy_data: List[Dict], filename: str = "proxies.txt") -> 
         return False
 
 
+def get_terraform_endpoints() -> List[str]:
+    """
+    Get API Gateway endpoints from Terraform outputs.
+    
+    Returns:
+        List of API Gateway endpoint URLs
+    """
+    try:
+        # Get the terraform-aws directory path
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        terraform_dir = os.path.join(script_dir, 'terraform-aws')
+        
+        if not os.path.exists(terraform_dir):
+            return []
+        
+        # Run terraform output command
+        result = subprocess.run(
+            ['terraform', 'output', '-json', 'api_endpoints_flat'],
+            cwd=terraform_dir,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            endpoints = json.loads(result.stdout)
+            if isinstance(endpoints, list) and len(endpoints) > 0:
+                return endpoints
+        
+        return []
+        
+    except Exception as e:
+        print_status("ERROR", f"Failed to get Terraform endpoints: {str(e)}")
+        return []
+
+
 def run_aws_rotation(target_url: str, num_requests: int) -> List[Dict]:
     """
     Run IP rotation using AWS API Gateway.
     
     Args:
-        target_url: Target URL to make requests to
+        target_url: Target URL to make requests to (e.g., https://httpbin.org/ip)
         num_requests: Number of requests to make
         
     Returns:
@@ -224,115 +261,104 @@ def run_aws_rotation(target_url: str, num_requests: int) -> List[Dict]:
     proxy_data = []
     
     try:
-        # Initialize API Gateway
-        print_status("WAIT", "Initializing AWS API Gateway...")
-        print_status("INFO", "This may take a minute - creating endpoints in AWS regions...")
+        # Get Terraform-deployed endpoints
+        print_status("WAIT", "Loading Terraform-deployed API Gateway endpoints...")
         print()
         
-        # Specify specific regions that are commonly available
-        regions = ["us-east-1", "us-west-2", "eu-west-1"]
-        gateway = ApiGateway(target_url, regions=regions)
+        endpoints = get_terraform_endpoints()
         
-        print()
-        print_status("SUCCESS", "API Gateway initialized")
-        
-        # Check if any endpoints were created
-        if hasattr(gateway, 'endpoints') and len(gateway.endpoints) == 0:
-            print_status("ERROR", "No API Gateway endpoints were created")
+        if not endpoints:
+            print_status("ERROR", "No Terraform endpoints found")
             print()
-            print("This usually means:")
-            print("  • AWS regions need to be manually enabled in your account")
-            print("  • Go to: AWS Console → Account → Regions")
-            print("  • Enable regions: us-east-1, us-west-2, eu-west-1")
-            print("  • Or check IAM permissions for API Gateway")
+            print("Please ensure:")
+            print("  • Terraform infrastructure is deployed: cd terraform-aws && terraform apply")
+            print("  • Terraform state exists in terraform-aws/ directory")
             print()
             return proxy_data
-            
+        
+        print_status("SUCCESS", f"Loaded {len(endpoints)} API Gateway endpoints")
         print()
         
-        # Use context manager to handle gateway lifecycle
-        with gateway:
-            print_status("WAIT", "Starting API Gateway endpoints...")
-            time.sleep(1)  # Brief pause for dramatic effect
-            print_status("SUCCESS", "Gateway endpoints are live")
-            print()
-            
-            # Create session and mount the gateway
-            session = requests.Session()
-            session.mount(target_url, gateway)
-            print_status("SUCCESS", "Gateway mounted to session")
-            print_separator()
-            print()
-            
-            # Make requests and demonstrate IP rotation
-            print("        ╔══════════════════════════════════════════════════════════╗")
-            print("        ║         ROTATING IP DEMONSTRATION - AWS                  ║")
-            print("        ╚══════════════════════════════════════════════════════════╝")
-            print()
-            
-            for i in range(1, num_requests + 1):
-                try:
-                    print_status("REQUEST", f"Request #{i}/{num_requests} - Fetching IP...")
-                    
-                    # Make the request and track timing
-                    start_time = time.time()
-                    response = session.get(target_url, timeout=10)
-                    response_time = (time.time() - start_time) * 1000  # Convert to milliseconds
-                    response.raise_for_status()
-                    
-                    # Extract and display IP
-                    response_data = response.json()
-                    ip_address = extract_ip(response_data)
-                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    
-                    # Store data for CSV export
-                    proxy_data.append({
-                        'request_number': i,
-                        'timestamp': timestamp,
-                        'ip_address': ip_address,
-                        'status_code': response.status_code,
-                        'response_time_ms': f"{response_time:.2f}"
-                    })
-                    
-                    print(f"            ┌{'─' * 60}┐")
-                    print(f"            │  IP Address: {ip_address:<44} │")
-                    print(f"            │  Status Code: {response.status_code:<43} │")
-                    print(f"            │  Response Time: {response_time:.2f} ms{' ' * (37 - len(f'{response_time:.2f}'))} │")
-                    print(f"            └{'─' * 60}┘")
-                    
-                    # Show rotation progress bar
-                    print_rotation_bar(i, num_requests)
-                    
-                    # Small delay between requests
-                    if i < num_requests:
-                        time.sleep(0.5)
-                    
-                except requests.exceptions.Timeout:
-                    print_status("ERROR", f"Request #{i} timed out")
-                    print()
-                except (IndexError, ValueError) as e:
-                    if "empty sequence" in str(e).lower():
-                        print_status("ERROR", f"No API Gateway endpoints available")
-                        print("         Skipping remaining requests...")
-                        print()
-                        break
-                    else:
-                        print_status("ERROR", f"Request #{i} failed: {str(e)}")
-                        print()
-                except requests.exceptions.RequestException as e:
-                    print_status("ERROR", f"Request #{i} failed: {str(e)}")
-                    print()
-                except Exception as e:
-                    print_status("ERROR", f"Unexpected error on request #{i}: {str(e)}")
-                    print()
-            
-            print_separator()
-            print()
-            print_status("SUCCESS", "All requests completed")
-            print_status("WAIT", "Shutting down API Gateway...")
+        # Extract the path from target_url (e.g., /ip from https://httpbin.org/ip)
+        from urllib.parse import urlparse
+        parsed_url = urlparse(target_url)
+        target_path = parsed_url.path if parsed_url.path else "/"
         
-        # Gateway automatically shuts down when exiting the 'with' block
-        print_status("SUCCESS", "Gateway shut down successfully")
+        print_status("INFO", f"Using {len(endpoints)} regional endpoints")
+        print_status("INFO", f"Target path: {target_path}")
+        print_separator()
+        print()
+        
+        # Make requests and demonstrate IP rotation
+        print("        ╔══════════════════════════════════════════════════════════╗")
+        print("        ║         ROTATING IP DEMONSTRATION - AWS                  ║")
+        print("        ╚══════════════════════════════════════════════════════════╝")
+        print()
+        
+        session = requests.Session()
+        
+        for i in range(1, num_requests + 1):
+            try:
+                # Rotate through endpoints
+                endpoint = endpoints[(i - 1) % len(endpoints)]
+                
+                # Construct the full URL: endpoint + target_path
+                request_url = endpoint + target_path
+                
+                # Extract region from endpoint URL for display
+                region = "unknown"
+                if ".execute-api." in endpoint:
+                    region = endpoint.split(".execute-api.")[1].split(".")[0]
+                
+                print_status("REQUEST", f"Request #{i}/{num_requests} - Region: {region}")
+                
+                # Make the request and track timing
+                start_time = time.time()
+                response = session.get(request_url, timeout=10)
+                response_time = (time.time() - start_time) * 1000  # Convert to milliseconds
+                response.raise_for_status()
+                
+                # Extract and display IP
+                response_data = response.json()
+                ip_address = extract_ip(response_data)
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+                # Store data for export
+                proxy_data.append({
+                    'request_number': i,
+                    'timestamp': timestamp,
+                    'ip_address': ip_address,
+                    'status_code': response.status_code,
+                    'response_time_ms': f"{response_time:.2f}"
+                })
+                
+                print(f"            ┌{'─' * 60}┐")
+                print(f"            │  Region: {region:<48} │")
+                print(f"            │  IP Address: {ip_address:<44} │")
+                print(f"            │  Status Code: {response.status_code:<43} │")
+                print(f"            │  Response Time: {response_time:.2f} ms{' ' * (37 - len(f'{response_time:.2f}'))} │")
+                print(f"            └{'─' * 60}┘")
+                
+                # Show rotation progress bar
+                print_rotation_bar(i, num_requests)
+                
+                # Small delay between requests
+                if i < num_requests:
+                    time.sleep(0.5)
+                
+            except requests.exceptions.Timeout:
+                print_status("ERROR", f"Request #{i} timed out")
+                print()
+            except requests.exceptions.RequestException as e:
+                print_status("ERROR", f"Request #{i} failed: {str(e)}")
+                print()
+            except Exception as e:
+                print_status("ERROR", f"Unexpected error on request #{i}: {str(e)}")
+                print()
+        
+        print_separator()
+        print()
+        print_status("SUCCESS", "All requests completed")
         print()
         
     except Exception as e:
@@ -340,9 +366,9 @@ def run_aws_rotation(target_url: str, num_requests: int) -> List[Dict]:
         print_status("ERROR", f"AWS error: {str(e)}")
         print()
         print("Troubleshooting tips:")
-        print("  • Verify AWS credentials are configured correctly")
-        print("  • Check AWS permissions for API Gateway operations")
-        print("  • Ensure boto3 and requests-ip-rotator are installed")
+        print("  • Verify Terraform infrastructure is deployed")
+        print("  • Check terraform-aws/terraform.tfstate exists")
+        print("  • Ensure AWS API Gateway endpoints are accessible")
         print()
         
     return proxy_data

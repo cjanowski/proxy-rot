@@ -1,8 +1,7 @@
 # Core dependencies
 requests
-requests-ip-rotator
 
-# AWS dependencies
+# AWS dependencies (boto3 needed for GCP alternative)
 boto3
 
 # GCP dependencies (optional)
