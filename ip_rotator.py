@@ -120,25 +120,63 @@ def print_banner():
     cyan_to_blue = lambda text: gradient_text(text, (0, 255, 255), (0, 100, 255))
     blue_to_purple = lambda text: gradient_text(text, (0, 150, 255), (200, 0, 255))
     
+    # Box content width is 60 characters
+    box_width = 60
+    
     print()
     print(f"{Colors.BRIGHT_CYAN}        ╔════════════════════════════════════════════════════════════╗{Colors.RESET}")
     print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}                                                            {Colors.BRIGHT_CYAN}║{Colors.RESET}")
-    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {cyan_to_blue('██████  ██████   ██████  ██   ██ ██    ██')}              {Colors.BRIGHT_CYAN}║{Colors.RESET}")
-    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {cyan_to_blue('██   ██ ██   ██ ██    ██  ██ ██   ██  ██')}               {Colors.BRIGHT_CYAN}║{Colors.RESET}")
-    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {cyan_to_blue('██████  ██████  ██    ██   ███     ████')}                {Colors.BRIGHT_CYAN}║{Colors.RESET}")
-    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {cyan_to_blue('██      ██   ██ ██    ██  ██ ██     ██')}                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
-    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {cyan_to_blue('██      ██   ██  ██████  ██   ██    ██')}                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    
+    # PROXY text - center as a block
+    proxy_lines = [
+        '██████  ██████   ██████  ██   ██ ██    ██',
+        '██   ██ ██   ██ ██    ██  ██ ██   ██  ██',
+        '██████  ██████  ██    ██   ███     ████',
+        '██      ██   ██ ██    ██  ██ ██     ██',
+        '██      ██   ██  ██████  ██   ██    ██'
+    ]
+    
+    # Find the longest line to center the block
+    max_proxy_len = max(len(line) for line in proxy_lines)
+    proxy_left_pad = (box_width - max_proxy_len) // 2
+    
+    for line in proxy_lines:
+        line_len = len(line)
+        right_pad = box_width - proxy_left_pad - line_len
+        print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}{' ' * proxy_left_pad}{cyan_to_blue(line)}{' ' * right_pad}{Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    
     print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}                                                            {Colors.BRIGHT_CYAN}║{Colors.RESET}")
-    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {blue_to_purple('██████   ██████  ████████')}                              {Colors.BRIGHT_CYAN}║{Colors.RESET}")
-    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {blue_to_purple('██   ██ ██    ██    ██')}                                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
-    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {blue_to_purple('██████  ██    ██    ██')}                                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
-    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {blue_to_purple('██   ██ ██    ██    ██')}                                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
-    print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}     {blue_to_purple('██   ██  ██████     ██')}                                 {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    
+    # ROT text - center as a block
+    rot_lines = [
+        '██████   ██████  ████████',
+        '██   ██ ██    ██    ██',
+        '██████  ██    ██    ██',
+        '██   ██ ██    ██    ██',
+        '██   ██  ██████     ██'
+    ]
+    
+    # Find the longest line to center the block
+    max_rot_len = max(len(line) for line in rot_lines)
+    rot_left_pad = (box_width - max_rot_len) // 2
+    
+    for line in rot_lines:
+        line_len = len(line)
+        right_pad = box_width - rot_left_pad - line_len
+        print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}{' ' * rot_left_pad}{blue_to_purple(line)}{' ' * right_pad}{Colors.BRIGHT_CYAN}║{Colors.RESET}")
+    
     print(f"{Colors.BRIGHT_CYAN}        ║{Colors.RESET}                                                            {Colors.BRIGHT_CYAN}║{Colors.RESET}")
     print(f"{Colors.BRIGHT_CYAN}        ╚════════════════════════════════════════════════════════════╝{Colors.RESET}")
     print()
-    print(f"              {Colors.BOLD}{Colors.BRIGHT_MAGENTA}▶  IP ROTATION ARSENAL  ◀{Colors.RESET}")
+    # Center the "IP ROTATION ARSENAL" text
+    arsenal_text = "▶  IP ROTATION ARSENAL  ◀"
+    arsenal_visible = len(arsenal_text)
+    arsenal_total_width = 60  # Match the box below
+    arsenal_left_pad = (arsenal_total_width - arsenal_visible) // 2 + 8  # 8 for indent
+    print(f"{' ' * arsenal_left_pad}{Colors.BOLD}{Colors.BRIGHT_MAGENTA}{arsenal_text}{Colors.RESET}")
     print()
+    
+    # Info box with proper padding
     print(f"{Colors.BRIGHT_BLACK}        ┌────────────────────────────────────────────────────────────┐{Colors.RESET}")
     print(f"{Colors.BRIGHT_BLACK}        │{Colors.RESET}  {Colors.BRIGHT_GREEN}STATUS:{Colors.RESET} {Colors.GREEN}LOCKED & LOADED{Colors.RESET}                                   {Colors.BRIGHT_BLACK}│{Colors.RESET}")
     print(f"{Colors.BRIGHT_BLACK}        │{Colors.RESET}  {Colors.BRIGHT_BLUE}MODE:{Colors.RESET} {Colors.BLUE}Automatic IP Cycling{Colors.RESET}                                {Colors.BRIGHT_BLACK}│{Colors.RESET}")
@@ -187,7 +225,7 @@ def print_status(status: str, message: str):
         "REQUEST": ("→", Colors.BRIGHT_CYAN)
     }
     symbol, color = status_config.get(status, ("•", Colors.WHITE))
-    print(f"  {color}{symbol} [{status:8s}]{Colors.RESET} {message}")
+    print(f"  {color}{symbol} [{status:7s}]{Colors.RESET} {message}")
 
 
 def print_rotation_bar(current: int, total: int):
@@ -275,15 +313,15 @@ def display_menu() -> str:
         
         if choice in ['1', 'aws']:
             print()
-            print_status("INFO", f"{Colors.BRIGHT_CYAN}Selected: AWS API Gateway{Colors.RESET}")
+            print_status("INFO", "Selected: AWS API Gateway")
             return 'aws'
         elif choice in ['2', 'gcp']:
             print()
-            print_status("INFO", f"{Colors.BRIGHT_MAGENTA}Selected: Google Cloud Platform{Colors.RESET}")
+            print_status("INFO", "Selected: Google Cloud Platform")
             return 'gcp'
         elif choice in ['3', 'view']:
             print()
-            print_status("INFO", f"{Colors.BRIGHT_YELLOW}Selected: View Current IPs{Colors.RESET}")
+            print_status("INFO", "Selected: View Current IPs")
             return 'view'
         elif choice in ['q', 'quit', 'exit']:
             print()
@@ -379,6 +417,80 @@ def get_terraform_endpoints() -> List[str]:
         return []
 
 
+def check_endpoint_ready(endpoint: str, max_retries: int = 3) -> bool:
+    """
+    Check if an API Gateway endpoint is ready with retries.
+    
+    Args:
+        endpoint: The API Gateway endpoint URL
+        max_retries: Maximum number of retry attempts
+        
+    Returns:
+        True if endpoint is ready, False otherwise
+    """
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(endpoint + "/ip", timeout=10)
+            if response.status_code == 200:
+                return True
+            elif response.status_code in [502, 503, 504]:
+                # Gateway not ready, wait and retry
+                if attempt < max_retries - 1:
+                    time.sleep(5)  # Wait 5 seconds before retry
+                continue
+            else:
+                return False
+        except requests.exceptions.RequestException:
+            if attempt < max_retries - 1:
+                time.sleep(5)
+            continue
+    
+    return False
+
+
+def wait_for_endpoints(endpoints: List[str]) -> List[str]:
+    """
+    Wait for API Gateway endpoints to be ready after deployment.
+    
+    Args:
+        endpoints: List of endpoint URLs to check
+        
+    Returns:
+        List of ready endpoint URLs
+    """
+    print_status("INFO", "Checking endpoint availability...")
+    
+    ready_endpoints = []
+    not_ready = []
+    
+    # Quick first check
+    for endpoint in endpoints:
+        try:
+            response = requests.get(endpoint + "/ip", timeout=5)
+            if response.status_code == 200:
+                ready_endpoints.append(endpoint)
+            else:
+                not_ready.append(endpoint)
+        except:
+            not_ready.append(endpoint)
+    
+    # If some aren't ready, wait and retry
+    if not_ready:
+        print_status("WAIT", f"{len(not_ready)} endpoints propagating... waiting 10 seconds")
+        time.sleep(10)
+        
+        for endpoint in not_ready:
+            if check_endpoint_ready(endpoint, max_retries=2):
+                ready_endpoints.append(endpoint)
+    
+    if len(ready_endpoints) < len(endpoints):
+        print_status("INFO", f"{len(ready_endpoints)}/{len(endpoints)} endpoints ready")
+    else:
+        print_status("SUCCESS", f"All {len(endpoints)} endpoints ready")
+    
+    return ready_endpoints
+
+
 def view_current_ips():
     """
     Display current available IPs from deployed infrastructure without running rotation.
@@ -388,21 +500,46 @@ def view_current_ips():
     
     header_text = "CURRENT AVAILABLE IPs"
     header_gradient = gradient_text(header_text, (255, 200, 0), (255, 100, 200))
+    
+    # Calculate proper centering for header
+    box_inner_width = 60
+    text_length = len(header_text)
+    left_padding = (box_inner_width - text_length) // 2
+    right_padding = box_inner_width - text_length - left_padding
+    
     print(f"        {Colors.BRIGHT_YELLOW}╔══════════════════════════════════════════════════════════╗{Colors.RESET}")
-    print(f"        {Colors.BRIGHT_YELLOW}║{Colors.RESET}              {header_gradient}                   {Colors.BRIGHT_YELLOW}║{Colors.RESET}")
+    print(f"        {Colors.BRIGHT_YELLOW}║{Colors.RESET}{' ' * left_padding}{header_gradient}{' ' * right_padding}{Colors.BRIGHT_YELLOW}║{Colors.RESET}")
     print(f"        {Colors.BRIGHT_YELLOW}╚══════════════════════════════════════════════════════════╝{Colors.RESET}")
     print()
     
     # Check AWS endpoints
-    print_status("INFO", f"{Colors.BRIGHT_CYAN}Checking AWS API Gateway endpoints...{Colors.RESET}")
+    print_status("INFO", "Checking AWS API Gateway endpoints...")
     print()
     
     aws_endpoints = get_terraform_endpoints()
+    
+    if not aws_endpoints:
+        print(f"  {Colors.BRIGHT_RED}✗{Colors.RESET} No AWS endpoints found. Deploy terraform-aws infrastructure first.")
+        print()
+    else:
+        # Wait for endpoints to be ready
+        aws_endpoints = wait_for_endpoints(aws_endpoints)
+        print()
+    
     aws_ips = []
     
     if aws_endpoints:
-        print(f"  {Colors.BRIGHT_CYAN}┌─ AWS API Gateway ({len(aws_endpoints)} regions) ─────────────────────────────┐{Colors.RESET}")
-        print(f"  {Colors.BRIGHT_CYAN}│{Colors.RESET}{' ' * 77}{Colors.BRIGHT_CYAN}│{Colors.RESET}")
+        box_width = 77
+        border_color = Colors.BRIGHT_CYAN
+        
+        def print_ip_line(content):
+            """Print an IP line with proper padding."""
+            vis_len = visible_length(content)
+            padding = box_width - vis_len
+            print(f"  {border_color}│{Colors.RESET}{content}{' ' * padding}{border_color}│{Colors.RESET}")
+        
+        print(f"  {border_color}┌─ AWS API Gateway ({len(aws_endpoints)} regions) {'─' * (box_width - 28 - len(str(len(aws_endpoints))))}┐{Colors.RESET}")
+        print_ip_line("")
         
         for idx, endpoint in enumerate(aws_endpoints, 1):
             try:
@@ -418,22 +555,23 @@ def view_current_ips():
                     ip = extract_ip(data)
                     aws_ips.append(ip)
                     
-                    # Display with gradient
-                    print(f"  {Colors.BRIGHT_CYAN}│{Colors.RESET}  {Colors.BRIGHT_WHITE}[{idx}]{Colors.RESET} {Colors.CYAN}{region:15s}{Colors.RESET} {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.BRIGHT_GREEN}{ip:50s}{Colors.RESET} {Colors.BRIGHT_CYAN}│{Colors.RESET}")
+                    # Display with proper alignment
+                    line = f"  {Colors.BRIGHT_WHITE}[{idx}]{Colors.RESET} {Colors.CYAN}{region:15s}{Colors.RESET} {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.BRIGHT_GREEN}{ip}{Colors.RESET}"
+                    print_ip_line(line)
                 else:
-                    print(f"  {Colors.BRIGHT_CYAN}│{Colors.RESET}  {Colors.BRIGHT_WHITE}[{idx}]{Colors.RESET} {Colors.CYAN}{region:15s}{Colors.RESET} {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.BRIGHT_RED}Failed (Status {response.status_code}){' ' * 30}{Colors.RESET} {Colors.BRIGHT_CYAN}│{Colors.RESET}")
+                    line = f"  {Colors.BRIGHT_WHITE}[{idx}]{Colors.RESET} {Colors.CYAN}{region:15s}{Colors.RESET} {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.BRIGHT_RED}Failed (Status {response.status_code}){Colors.RESET}"
+                    print_ip_line(line)
             except Exception as e:
-                print(f"  {Colors.BRIGHT_CYAN}│{Colors.RESET}  {Colors.BRIGHT_WHITE}[{idx}]{Colors.RESET} {Colors.CYAN}{region:15s}{Colors.RESET} {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.BRIGHT_RED}Error: {str(e)[:40]:40s}{Colors.RESET} {Colors.BRIGHT_CYAN}│{Colors.RESET}")
+                error_msg = str(e)[:40] if len(str(e)) > 40 else str(e)
+                line = f"  {Colors.BRIGHT_WHITE}[{idx}]{Colors.RESET} {Colors.CYAN}{region:15s}{Colors.RESET} {Colors.BRIGHT_BLACK}→{Colors.RESET} {Colors.BRIGHT_RED}Error: {error_msg}{Colors.RESET}"
+                print_ip_line(line)
         
-        print(f"  {Colors.BRIGHT_CYAN}│{Colors.RESET}{' ' * 77}{Colors.BRIGHT_CYAN}│{Colors.RESET}")
-        print(f"  {Colors.BRIGHT_CYAN}└{'─' * 77}┘{Colors.RESET}")
-        print()
-    else:
-        print(f"  {Colors.BRIGHT_RED}✗{Colors.RESET} No AWS endpoints found. Deploy terraform-aws infrastructure first.")
+        print_ip_line("")
+        print(f"  {border_color}└{'─' * box_width}┘{Colors.RESET}")
         print()
     
     # Check GCP endpoints (if available)
-    print_status("INFO", f"{Colors.BRIGHT_MAGENTA}Checking GCP infrastructure...{Colors.RESET}")
+    print_status("INFO", "Checking GCP infrastructure...")
     print()
     
     # Check if gcloud is available
@@ -483,7 +621,7 @@ def view_current_ips():
                         else:
                             f.write(f"{ip}\n")
                 
-                print_status("SUCCESS", f"{Colors.BRIGHT_GREEN}IPs exported: current_ips.txt{Colors.RESET}")
+                print_status("SUCCESS", "IPs exported: current_ips.txt")
                 print(f"            {Colors.BRIGHT_BLACK}Total:{Colors.RESET} {Colors.WHITE}{len(aws_ips)} IPs{Colors.RESET}")
                 print()
             except Exception as e:
@@ -527,6 +665,17 @@ def run_aws_rotation(target_url: str, num_requests: int) -> List[Dict]:
         print_status("SUCCESS", f"Loaded {len(endpoints)} API Gateway endpoints")
         print()
         
+        # Wait for endpoints to be ready
+        endpoints = wait_for_endpoints(endpoints)
+        print()
+        
+        if not endpoints:
+            print_status("ERROR", "No endpoints are ready. They may still be propagating.")
+            print()
+            print("Try waiting 1-2 minutes and running again.")
+            print()
+            return proxy_data
+        
         # Extract the path from target_url (e.g., /ip from https://httpbin.org/ip)
         from urllib.parse import urlparse
         parsed_url = urlparse(target_url)
@@ -540,8 +689,15 @@ def run_aws_rotation(target_url: str, num_requests: int) -> List[Dict]:
         # Make requests and demonstrate IP rotation
         header_text = "ROTATING IP DEMONSTRATION - AWS"
         header_gradient = gradient_text(header_text, (0, 255, 255), (100, 150, 255))
+        
+        # Calculate proper centering
+        box_inner_width = 60
+        text_length = len(header_text)
+        left_padding = (box_inner_width - text_length) // 2
+        right_padding = box_inner_width - text_length - left_padding
+        
         print(f"        {Colors.BRIGHT_CYAN}╔══════════════════════════════════════════════════════════╗{Colors.RESET}")
-        print(f"        {Colors.BRIGHT_CYAN}║{Colors.RESET}         {header_gradient}                  {Colors.BRIGHT_CYAN}║{Colors.RESET}")
+        print(f"        {Colors.BRIGHT_CYAN}║{Colors.RESET}{' ' * left_padding}{header_gradient}{' ' * right_padding}{Colors.BRIGHT_CYAN}║{Colors.RESET}")
         print(f"        {Colors.BRIGHT_CYAN}╚══════════════════════════════════════════════════════════╝{Colors.RESET}")
         print()
         
@@ -670,8 +826,15 @@ def run_gcp_rotation(target_url: str, num_requests: int) -> List[Dict]:
     try:
         header_text = "ROTATING IP DEMONSTRATION - GCP"
         header_gradient = gradient_text(header_text, (255, 100, 200), (200, 0, 255))
+        
+        # Calculate proper centering
+        box_inner_width = 60
+        text_length = len(header_text)
+        left_padding = (box_inner_width - text_length) // 2
+        right_padding = box_inner_width - text_length - left_padding
+        
         print(f"        {Colors.BRIGHT_MAGENTA}╔══════════════════════════════════════════════════════════╗{Colors.RESET}")
-        print(f"        {Colors.BRIGHT_MAGENTA}║{Colors.RESET}         {header_gradient}                  {Colors.BRIGHT_MAGENTA}║{Colors.RESET}")
+        print(f"        {Colors.BRIGHT_MAGENTA}║{Colors.RESET}{' ' * left_padding}{header_gradient}{' ' * right_padding}{Colors.BRIGHT_MAGENTA}║{Colors.RESET}")
         print(f"        {Colors.BRIGHT_MAGENTA}╚══════════════════════════════════════════════════════════╝{Colors.RESET}")
         print()
         
@@ -800,81 +963,112 @@ def run_gcp_rotation(target_url: str, num_requests: int) -> List[Dict]:
 
 def main():
     """Main execution function."""
-    # Print banner
+    # Print banner once at the start
     print_banner()
     
-    # Display menu and get provider choice
-    provider = display_menu()
-    
-    # Handle view option separately
-    if provider == 'view':
-        view_current_ips()
-        return
-    
-    print_separator()
-    print()
-    
-    # Configuration
-    target_url = "https://httpbin.org/ip"
-    num_requests = 5
-    
-    # Storage for proxy data
-    proxy_data = []
-    
-    print_status("INFO", f"Provider: {provider.upper()}")
-    print_status("INFO", f"Target URL: {target_url}")
-    print_status("INFO", f"Number of requests: {num_requests}")
-    print_status("INFO", f"Export: proxies.txt (optional)")
-    print_separator()
-    print()
-    
-    # Run the appropriate rotation based on provider
-    if provider == 'aws':
-        proxy_data = run_aws_rotation(target_url, num_requests)
-    elif provider == 'gcp':
-        proxy_data = run_gcp_rotation(target_url, num_requests)
-    else:
-        print_status("ERROR", f"Unknown provider: {provider}")
-        sys.exit(1)
-    
-    # Export to proxies.txt
-    if proxy_data:
+    # Main menu loop
+    while True:
+        # Display menu and get provider choice
+        provider = display_menu()
+        
+        # Handle view option separately
+        if provider == 'view':
+            view_current_ips()
+            
+            # Ask if user wants to return to menu
+            print()
+            continue_choice = input(f"  {Colors.BRIGHT_YELLOW}→{Colors.RESET} Return to main menu? {Colors.BRIGHT_BLACK}[Y/n]{Colors.RESET}: ").strip().lower()
+            if continue_choice in ['', 'y', 'yes']:
+                print()
+                continue
+            else:
+                break
+        
         print_separator()
         print()
         
-        export_header = "EXPORT PROXY LIST"
-        export_gradient = gradient_text(export_header, (100, 255, 100), (100, 200, 255))
-        print(f"        {Colors.BRIGHT_GREEN}╔══════════════════════════════════════════════════════════╗{Colors.RESET}")
-        print(f"        {Colors.BRIGHT_GREEN}║{Colors.RESET}              {export_gradient}                           {Colors.BRIGHT_GREEN}║{Colors.RESET}")
-        print(f"        {Colors.BRIGHT_GREEN}╚══════════════════════════════════════════════════════════╝{Colors.RESET}")
-        print()
-        print(f"            {Colors.BRIGHT_CYAN}Total IPs collected:{Colors.RESET} {Colors.CYAN}{len(proxy_data)}{Colors.RESET}")
+        # Configuration
+        target_url = "https://httpbin.org/ip"
+        num_requests = 5
+        
+        # Storage for proxy data
+        proxy_data = []
+        
+        print_status("INFO", f"Provider: {provider.upper()}")
+        print_status("INFO", f"Target URL: {target_url}")
+        print_status("INFO", f"Number of requests: {num_requests}")
+        print_status("INFO", f"Export: proxies.txt (optional)")
+        print_separator()
         print()
         
-        # Ask if user wants to export IPs to text file
-        txt_choice = input(f"  {Colors.BRIGHT_YELLOW}→{Colors.RESET} Export IP list to proxies.txt? {Colors.BRIGHT_BLACK}[Y/n]{Colors.RESET}: ").strip().lower()
-        
-        if txt_choice in ['', 'y', 'yes']:
-            print()
-            print_status("WAIT", "Exporting IPs to proxies.txt...")
-            if export_ips_to_txt(proxy_data, "proxies.txt"):
-                print_status("SUCCESS", f"{Colors.BRIGHT_GREEN}IPs exported: proxies.txt{Colors.RESET}")
-                print(f"            {Colors.BRIGHT_BLACK}Format:{Colors.RESET} {Colors.WHITE}One IP per line{Colors.RESET}")
-                print(f"            {Colors.BRIGHT_BLACK}Total:{Colors.RESET} {Colors.WHITE}{len(proxy_data)} IPs{Colors.RESET}")
-            print()
+        # Run the appropriate rotation based on provider
+        if provider == 'aws':
+            proxy_data = run_aws_rotation(target_url, num_requests)
+        elif provider == 'gcp':
+            proxy_data = run_gcp_rotation(target_url, num_requests)
         else:
+            print_status("ERROR", f"Unknown provider: {provider}")
+            continue
+        
+        # Export to proxies.txt
+        if proxy_data:
+            print_separator()
             print()
-            print_status("INFO", "Export skipped")
+            
+            export_header = "EXPORT PROXY LIST"
+            export_gradient = gradient_text(export_header, (100, 255, 100), (100, 200, 255))
+            
+            # Calculate proper centering
+            box_inner_width = 60
+            text_length = len(export_header)
+            left_padding = (box_inner_width - text_length) // 2
+            right_padding = box_inner_width - text_length - left_padding
+            
+            print(f"        {Colors.BRIGHT_GREEN}╔══════════════════════════════════════════════════════════╗{Colors.RESET}")
+            print(f"        {Colors.BRIGHT_GREEN}║{Colors.RESET}{' ' * left_padding}{export_gradient}{' ' * right_padding}{Colors.BRIGHT_GREEN}║{Colors.RESET}")
+            print(f"        {Colors.BRIGHT_GREEN}╚══════════════════════════════════════════════════════════╝{Colors.RESET}")
             print()
-    else:
-        print_status("ERROR", "No proxy data collected")
+            print(f"            {Colors.BRIGHT_CYAN}Total IPs collected:{Colors.RESET} {Colors.CYAN}{len(proxy_data)}{Colors.RESET}")
+            print()
+            
+            # Ask if user wants to export IPs to text file
+            txt_choice = input(f"  {Colors.BRIGHT_YELLOW}→{Colors.RESET} Export IP list to proxies.txt? {Colors.BRIGHT_BLACK}[Y/n]{Colors.RESET}: ").strip().lower()
+            
+            if txt_choice in ['', 'y', 'yes']:
+                print()
+                print_status("WAIT", "Exporting IPs to proxies.txt...")
+                if export_ips_to_txt(proxy_data, "proxies.txt"):
+                    print_status("SUCCESS", "IPs exported: proxies.txt")
+                    print(f"            {Colors.BRIGHT_BLACK}Format:{Colors.RESET} {Colors.WHITE}One IP per line{Colors.RESET}")
+                    print(f"            {Colors.BRIGHT_BLACK}Total:{Colors.RESET} {Colors.WHITE}{len(proxy_data)} IPs{Colors.RESET}")
+                print()
+            else:
+                print()
+                print_status("INFO", "Export skipped")
+                print()
+        else:
+            print_status("ERROR", "No proxy data collected")
+            print()
+        
+        # Final completion message with gradient
+        print_separator("═", 80, Colors.BRIGHT_MAGENTA)
+        completion_text = "PROXY ROTATION COMPLETE"
+        print_box(completion_text, 80)
+        print_separator("═", 80, Colors.BRIGHT_MAGENTA)
         print()
+        
+        # Ask if user wants to return to menu or exit
+        continue_choice = input(f"  {Colors.BRIGHT_YELLOW}→{Colors.RESET} Return to main menu? {Colors.BRIGHT_BLACK}[Y/n]{Colors.RESET}: ").strip().lower()
+        if continue_choice in ['', 'y', 'yes']:
+            print()
+            continue
+        else:
+            break
     
-    # Final completion message with gradient
-    print_separator("═", 80, Colors.BRIGHT_MAGENTA)
-    completion_text = "PROXY ROTATION COMPLETE"
-    print_box(completion_text, 80)
-    print_separator("═", 80, Colors.BRIGHT_MAGENTA)
+    # Exit message
+    print()
+    print_status("INFO", "Exiting PROXY ROT...")
+    print()
 
 
 if __name__ == "__main__":
