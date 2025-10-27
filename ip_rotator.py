@@ -412,7 +412,7 @@ def view_current_ips():
                     region = endpoint.split(".execute-api.")[1].split(".")[0]
                 
                 # Make a quick request to get the IP
-                response = requests.get(endpoint + "/ip", timeout=5)
+                response = requests.get(endpoint + "/ip", timeout=15)
                 if response.status_code == 200:
                     data = response.json()
                     ip = extract_ip(data)
@@ -564,7 +564,7 @@ def run_aws_rotation(target_url: str, num_requests: int) -> List[Dict]:
                 
                 # Make the request and track timing
                 start_time = time.time()
-                response = session.get(request_url, timeout=10)
+                response = session.get(request_url, timeout=20)
                 response_time = (time.time() - start_time) * 1000  # Convert to milliseconds
                 response.raise_for_status()
                 
@@ -733,7 +733,7 @@ def run_gcp_rotation(target_url: str, num_requests: int) -> List[Dict]:
                         
                 else:
                     # Fall back to direct request
-                    response = requests.get(target_url, timeout=10)
+                    response = requests.get(target_url, timeout=20)
                     response_time = (time.time() - start_time) * 1000
                     response.raise_for_status()
                     
