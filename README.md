@@ -2,7 +2,7 @@
 
 > IP Rotation Arsenal - A tactical CLI tool for AWS & GCP proxy rotation.
 
-<img width="1512" height="982" alt="Screenshot 2025-10-27 at 8 21 34 AM" src="https://github.com/user-attachments/assets/015e43ae-f5de-46e5-a81c-26b6fb0c28f2" />
+<img width="1512" height="982" alt="Screenshot 2025-10-27 at 10 17 52 AM" src="https://github.com/user-attachments/assets/c76e3625-0206-4c19-9934-5cfca859513b" />
 
 ---
 
